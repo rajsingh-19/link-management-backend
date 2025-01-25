@@ -98,26 +98,26 @@ const deleteUser = async (userId) => {
 
   if (!isUserExist) {
     const error = new Error('This User is not associated with any account');
-    error.status = 400;
+    error.status = 404;
     throw error;
   };
 
-  return await UserModel.findByIdAndDelete(userId);
+  const user = await UserModel.findByIdAndDelete(userId);
+
+  return user;
 };
 
+//    api service for fetching the user info
 const infoUser = async (userId) => {
-  const isUserExist = await UserModel.findById(userId);
+  const user = await UserModel.findById(userId);
 
-  if (!isUserExist) {
+  if (!user) {
     const error = new Error('This User is not associated with any account');
-    error.status = 400;
+    error.status = 404;
     throw error;
   };
 
-  const result = await UserModel.findById(userId);
-
-  return result;
+  return user;
 };
-
 
 module.exports = { registerUser, loginUser, updateUser, deleteUser, infoUser };

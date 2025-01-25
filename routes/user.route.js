@@ -6,8 +6,8 @@ const { registerHandler, loginHandler, updateHandler, deleteHandler, infoHandler
 //      register route
 router.post('/login', loginHandler);
 router.post('/register', registerHandler);
-router.put('/update', verifyUser, updateHandler);
-router.delete('/delete', verifyUser, deleteHandler);
-router.get('/info', infoHandler);
+router.put('/update/:userId', verifyUser, updateHandler);
+router.delete('/delete/:userId', verifyUser, deleteHandler);
+router.get('/info/:userId', infoHandler);
 
 module.exports = router;

@@ -1,8 +1,9 @@
 const dotenv = require("dotenv");
-const { registerUser, loginUser, updateUser, deleteUser, infoUser } = require("../services/index");
+const { registerUser, loginUser, updateUser, deleteUser, infoUser } = require("../services/user.service");
 
 dotenv.config();
 
+//          register handler
 const registerHandler = async (req, res) => {
     const { name, email, mobile, password } =  req.body;
 
@@ -22,6 +23,7 @@ const registerHandler = async (req, res) => {
     }
 };
 
+//          login handler
 const loginHandler = async (req, res) => {
     const { email, password } = req.body;
 
@@ -40,9 +42,10 @@ const loginHandler = async (req, res) => {
     }
 };
 
+//          user update handler
 const updateHandler = async (req, res) => {
     const { name, email, mobile } =  req.body;
-    const userId = req.user.id;
+    const { userId } = req.params;
 
     if (!name && !email && !mobile) {
         return res.status(400).json({ message: "No valid fields to update" });
@@ -57,7 +60,7 @@ const updateHandler = async (req, res) => {
         //  Check if the user exists in the db 
         const result = await updateUser(name, email, mobile, userId);
 
-        return res.status(200).json({ message: "Details Updated Successfully"});
+        return res.status(201).json({ message: "Details Updated Successfully"});
     } catch (error) {
         console.error(error);
 
@@ -69,10 +72,11 @@ const updateHandler = async (req, res) => {
     }
 };
 
+//          user delete handler
 const deleteHandler = async (req, res) => {
-    const userId = req.user.id;
+    const { userId } = req.params;
     
-    if (!req.user || !req.user.id) {
+    if (!userId) {
         return res.status(400).json({ message: "User ID is missing or invalid" });
     };    
 
@@ -81,6 +85,7 @@ const deleteHandler = async (req, res) => {
         //  Check if the user exists in the db 
         await deleteUser(userId);
 
+        console.log("User deleted successfully"); // Debugging log
         return res.status(200).json({ message: "User deleted Successfully"});
     } catch (error) {
         console.error(error);
@@ -93,17 +98,26 @@ const deleteHandler = async (req, res) => {
     }
 };
 
+//          user info handler
 const infoHandler = async (req, res) => {
-    const userId = req.user.id;
+    const { userId } = req.params;
 
-    if (!req.user || !req.user.id) {
+    if (!userId) {
         return res.status(400).json({ message: "User ID is missing or invalid" });
     }; 
 
     try {
-        const result = await infoUser(userId);
+        const userInfo = await infoUser(userId);
 
-        return res.status(200).json({ message: "Fetched user info.", result });
+        // Extract the required fields from the userInfo object
+        const filteredUserInfo = {
+        name: userInfo.name,
+        email: userInfo.email,
+        mobile: userInfo.mobile,
+        _id: userInfo._id,
+        };
+
+        return res.status(200).json({ message: "Fetched user info.", result: filteredUserInfo });
     } catch (error) {
         console.error(error);
 
