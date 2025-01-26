@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const connectDB = require("./config/dbConfig");
 const userRoute = require("./routes/user.route");
+const linkRoute = require('./routes/link.route');
 
 const app = express();
 dotenv.config();
@@ -15,6 +16,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 5480;
 
 app.use('/api/user', userRoute);
+app.use('/api/link', linkRoute);
 
 app.get('/', (req, res) =>  {
     res.send("Server established");

@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const UserModel = require('../models/user.schema');
+const LinkModel = require('../models/link.schema');
 
 dotenv.config();
 
@@ -101,6 +102,8 @@ const deleteUser = async (userId) => {
     error.status = 404;
     throw error;
   };
+
+  await LinkModel.deleteMany({ userId });
 
   const user = await UserModel.findByIdAndDelete(userId);
 
