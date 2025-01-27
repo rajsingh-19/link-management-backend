@@ -108,7 +108,7 @@ const createLinkHandler = async (req, res) => {
 const updateLinkHandler = async (req, res) => {
   const { originalUrl, remarks, linkExpiryDate } = req.body;
 
-  const linkId = req.body.id;
+  const linkId = req.query.id;
 
   if (!originalUrl && !remarks && !linkExpiryDate) {
     return res.status(400).json({ message: 'No valid fields to update' });
@@ -264,7 +264,8 @@ const clickShortLinkHandler = async (req, res) => {
 
     const redirectLink = `http://localhost:5173/links`
     // Redirect the user to the original URL
-    return res.redirect(redirectLink); 
+    // return res.redirect(redirectLink); 
+    res.send({ message: "Clicks Counted" });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'An error occurred' });
