@@ -8,7 +8,9 @@ const {
   getAllLinksHandler,
   searchByRemarksHandler,
   getAllClicksHandler,
-  addClickHandler,
+  getLinkHandler,
+  getAllClicksForDashboardHandler,
+  clickShortLinkHandler
 } = require('../controllers/linkController');
 
 router.post('/createLink', verifyUser, createLinkHandler);
@@ -17,6 +19,8 @@ router.delete('/deleteLink', verifyUser, deleteLinkHandler);
 router.get('/getAllLinks', getAllLinksHandler);
 router.get('/search', searchByRemarksHandler);
 router.get('/getAllClicks', getAllClicksHandler);
-router.post('/addClick', addClickHandler);
+router.get('/getAllClicksForDashboard', getAllClicksForDashboardHandler);
+router.get('/getLink', getLinkHandler);
+router.get('/:shortenUrl', clickShortLinkHandler);
 
 module.exports = router;

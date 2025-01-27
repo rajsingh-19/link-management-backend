@@ -1,4 +1,5 @@
 const dotenv = require('dotenv');
+const useragent = require('useragent');
 const {
   deleteLink,
   updateLink,
@@ -6,7 +7,9 @@ const {
   searchByRemarks,
   createLink,
   getAllClicks,
-  addClick,
+  getLinkById,
+  getAllClicksForDashboard,
+  addShortLinkClick
 } = require('../services/link.service');
 
 dotenv.config();
@@ -153,8 +156,33 @@ const deleteLinkHandler = async (req, res) => {
   }
 };
 
-//      get all the clicks handler
-const getAllClicksHandler = async (req, res) => {
+//    get a link by id handler
+const getLinkHandler = async (req, res) => {
+  const linkId = req.query.id;
+
+  if (!linkId) {
+    return res.status(400).json({ message: 'Link ID is missing or invalid' });
+  }
+
+  try {
+    const result = await getLinkById(linkId);
+
+    return res
+      .status(200)
+      .json({ message: 'Link Fetched Successfully', result });
+  } catch (error) {
+    console.error(error);
+
+    if (error.status) {
+      return res.status(error.status).json({ message: error.message });
+    }
+
+    return res.status(500).json({ message: 'An error occured' });
+  }
+};
+
+//      get all the clicks info for dashboard
+const getAllClicksForDashboardHandler = async (req, res) => {
   const userId = req.query.id;
 
   if (!userId) {
@@ -162,7 +190,7 @@ const getAllClicksHandler = async (req, res) => {
   }
 
   try {
-    const result = await getAllClicks(userId);
+    const result = await getAllClicksForDashboard(userId);
 
     return res
       .status(200)
@@ -178,30 +206,21 @@ const getAllClicksHandler = async (req, res) => {
   }
 };
 
-//    add click handler
-const addClickHandler = async (req, res) => {
-  const { shortenUrl } = req.body;
+//      get all the clicks handler
+const getAllClicksHandler = async (req, res) => {
+  const userId = req.query.id;
+  const page = req.query.page;
 
-  // Extract IP address from the request
-  const ipAddress =
-    req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-
-  // Extract device information (user agent) from the request
-  const userAgent = req.headers['user-agent'];
-  const userDevice = userAgent || 'Unknown Device';
-
-  if (!shortenUrl || !userDevice || !ipAddress) {
-    return res
-      .status(400)
-      .json({ message: 'Shorten URL, userDevice, and IP address are required' });
+  if (!userId) {
+    return res.status(400).json({ message: 'User ID is missing or invalid' });
   }
 
   try {
-    const result = await addClick(shortenUrl, { userDevice, ipAddress });
+    const result = await getAllClicks(userId, page);
 
     return res
       .status(200)
-      .json({ message: 'Click Added Successfully', result });
+      .json({ message: 'Clicks Fetched Successfully', result });
   } catch (error) {
     console.error(error);
 
@@ -213,6 +232,45 @@ const addClickHandler = async (req, res) => {
   }
 };
 
+//      get the click count handler
+const clickShortLinkHandler = async (req, res) => {
+  const { shortenUrl } = req.params;
+
+  // Extract IP address from the request
+  const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  const cleanedIpAddress = ipAddress && ipAddress.split(',')[0].trim(); // Handle the forwarded IP chain
+
+  // Extract device information (user agent) from the request
+  const userAgent = req.headers['user-agent'];
+
+  // Use useragent library to parse the user agent string
+  const agent = useragent.parse(userAgent);
+
+  console.log(agent.family);
+  console.log(agent.device);
+  
+  // Check if device is a string and convert it to lowercase, otherwise fallback to 'Unknown Device'
+  const userDevice = typeof agent.device === 'string' ? agent.device.toLowerCase() : 'Unknown Device';
+
+  if (!shortenUrl || !userDevice || !cleanedIpAddress) {
+    return res.status(400).json({
+      message: 'Shorten URL, userDevice, and IP address are required',
+    });
+  };
+
+  try {
+    // Add click to the database
+    const result = await addShortLinkClick(shortenUrl, { userDevice, ipAddress: cleanedIpAddress });
+
+    const redirectLink = `http://localhost:5173/links`
+    // Redirect the user to the original URL
+    return res.redirect(redirectLink); 
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'An error occurred' });
+  }
+};
+
 module.exports = {
   deleteLinkHandler,
   updateLinkHandler,
@@ -220,5 +278,7 @@ module.exports = {
   searchByRemarksHandler,
   createLinkHandler,
   getAllClicksHandler,
-  addClickHandler,
+  getLinkHandler,
+  getAllClicksForDashboardHandler,
+  clickShortLinkHandler
 };

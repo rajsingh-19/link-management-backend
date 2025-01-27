@@ -110,6 +110,20 @@ const getAllLinks = async (userId, page = 1) => {
   return links;
 };
 
+// API service to get a link by its ID
+const getLinkById = async (linkId) => {
+  // Check if the link exists
+  const link = await LinkModel.findById(linkId).populate('clicks');
+
+  if (!link) {
+    const error = new Error('No link found with the provided ID');
+    error.status = 404;
+    throw error;
+  }
+
+  return link;
+};
+
 // api service to search by remarks
 const searchByRemarks = async (userId, remarks, page = 1) => {
   const isUserExist = await UserModel.findById(userId);
@@ -134,16 +148,16 @@ const searchByRemarks = async (userId, remarks, page = 1) => {
   return links;
 };
 
-//    api service for geting all the clicks
-const getAllClicks = async (userId) => {
+//      api service for geting all clicks on dashboard
+const getAllClicksForDashboard = async (userId) => {
   const isUserExist = await UserModel.findById(userId);
   if (!isUserExist) {
     throw new Error('This user is not associated with any account');
   }
 
-  const links = await LinkModel.find({ userId }).select(
-    'clicks originalUrl shortenUrl'
-  );
+  const links = await LinkModel.find({ userId })
+    .sort({ _id: -1 })
+    .select('clicks originalUrl shortenUrl');
 
   const allClicks = links.reduce((acc, link) => {
     const clicksWithUrls = link.clicks.map((click) => ({
@@ -157,14 +171,50 @@ const getAllClicks = async (userId) => {
   return allClicks;
 };
 
+//    api service for geting all the clicks
+const getAllClicks = async (userId, page = 1) => {
+  const isUserExist = await UserModel.findById(userId);
+    if (!isUserExist) {
+      throw new Error('This user is not associated with any account');
+    }
+
+    const links = await LinkModel.find({ userId })
+      .sort({ _id: -1 })
+      .select('clicks originalUrl shortenUrl');
+
+    const limit = 8;
+    const skip = (page - 1) * limit;
+
+    const allClicks = links.reduce((acc, link) => {
+    const clicksWithUrls = link.clicks.map((click) => ({
+      click,
+      originalUrl: link.originalUrl,
+      shortenUrl: link.shortenUrl,
+    }));
+  
+    return acc.concat(clicksWithUrls);
+  }, []);
+
+  const paginatedClicks = allClicks.slice(skip, skip + limit);
+
+  return paginatedClicks;
+};
+
+
 // API service to add a click to a link
-const addClick = async (shortenUrl, clickData) => {
+const addShortLinkClick = async (shortenUrl, clickData) => {
+  console.log(shortenUrl);
   const { userDevice, ipAddress } = clickData;
 
-  const link = await LinkModel.findOne({ shortenUrl });
+  // Get the hostname from the environment variable
+  const hostname = process.env.HOSTNAME;
+  const filterUrl = `${hostname}/${shortenUrl}`
+
+  console.log(filterUrl);
+  const link = await LinkModel.findOne({ shortenUrl: filterUrl });
   if (!link) {
     throw new Error('This link does not exist');
-  }
+  };
 
   const newClick = { userDevice, ipAddress, clickedAt: new Date() };
   link.clicks.push(newClick);
@@ -180,5 +230,7 @@ module.exports = {
   searchByRemarks,
   createLink,
   getAllClicks,
-  addClick,
+  getLinkById,
+  getAllClicksForDashboard,
+  addShortLinkClick
 };
