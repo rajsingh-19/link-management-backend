@@ -47,18 +47,26 @@ const searchByRemarksHandler = async (req, res) => {
 //      get all link handler
 const getAllLinksHandler = async (req, res) => {
   const userId = req.query.id;
-  const page = req.query.page;
+  const page = parseInt(req.query.page) || 1; // Default to 1 if page is not provided
 
   if (!userId) {
     return res.status(400).json({ message: 'User ID is missing or invalid' });
   }
 
   try {
-    const result = await getAllLinks(userId, page);
+    const { links, totalItems } = await getAllLinks(userId, page);
 
-    return res
-      .status(200)
-      .json({ message: 'Links Fetched Successfully', result });
+    // Calculate totalPages
+    const limit = 8;
+    const totalPages = Math.ceil(totalItems / limit);
+
+    return res.status(200).json({
+      message: 'Links Fetched Successfully',
+      result: links,
+      totalPages,
+      currentPage: page,
+      totalItems
+    });
   } catch (error) {
     console.error(error);
 
@@ -77,17 +85,17 @@ const createLinkHandler = async (req, res) => {
 
   if (!originalUrl && !remarks && !linkExpiryDate) {
     return res.status(400).json({ message: 'No valid fields to create' });
-  }
+  };
 
   if (!originalUrl || !remarks) {
     return res
       .status(400)
       .json({ message: 'Both originalUrl and remarks are required' });
-  }
+  };
 
   if (!userId) {
     return res.status(400).json({ message: 'User ID is missing or invalid' });
-  }
+  };
 
   try {
     const result = await createLink(req.body, userId);
@@ -98,7 +106,7 @@ const createLinkHandler = async (req, res) => {
 
     if (error.status) {
       return res.status(error.status).json({ message: error.message });
-    }
+    };
 
     return res.status(500).json({ message: 'An error occured' });
   }
@@ -112,11 +120,11 @@ const updateLinkHandler = async (req, res) => {
 
   if (!originalUrl && !remarks && !linkExpiryDate) {
     return res.status(400).json({ message: 'No valid fields to update' });
-  }
+  };
 
   if (!linkId) {
     return res.status(400).json({ message: 'Link ID is missing or invalid' });
-  }
+  };
 
   try {
     const result = await updateLink(linkId, req.body);
@@ -127,7 +135,7 @@ const updateLinkHandler = async (req, res) => {
 
     if (error.status) {
       return res.status(error.status).json({ message: error.message });
-    }
+    };
 
     return res.status(500).json({ message: 'An error occured' });
   }
@@ -139,7 +147,7 @@ const deleteLinkHandler = async (req, res) => {
 
   if (!linkId) {
     return res.status(400).json({ message: 'Link ID is missing or invalid' });
-  }
+  };
 
   try {
     await deleteLink(linkId);
@@ -150,7 +158,7 @@ const deleteLinkHandler = async (req, res) => {
 
     if (error.status) {
       return res.status(error.status).json({ message: error.message });
-    }
+    };
 
     return res.status(500).json({ message: 'An error occured' });
   }
@@ -162,7 +170,7 @@ const getLinkHandler = async (req, res) => {
 
   if (!linkId) {
     return res.status(400).json({ message: 'Link ID is missing or invalid' });
-  }
+  };
 
   try {
     const result = await getLinkById(linkId);
@@ -175,7 +183,7 @@ const getLinkHandler = async (req, res) => {
 
     if (error.status) {
       return res.status(error.status).json({ message: error.message });
-    }
+    };
 
     return res.status(500).json({ message: 'An error occured' });
   }
@@ -187,7 +195,7 @@ const getAllClicksForDashboardHandler = async (req, res) => {
 
   if (!userId) {
     return res.status(400).json({ message: 'User ID is missing or invalid' });
-  }
+  };
 
   try {
     const result = await getAllClicksForDashboard(userId);
@@ -200,7 +208,7 @@ const getAllClicksForDashboardHandler = async (req, res) => {
 
     if (error.status) {
       return res.status(error.status).json({ message: error.message });
-    }
+    };
 
     return res.status(500).json({ message: 'An error occurred' });
   }
@@ -209,24 +217,33 @@ const getAllClicksForDashboardHandler = async (req, res) => {
 //      get all the clicks handler
 const getAllClicksHandler = async (req, res) => {
   const userId = req.query.id;
-  const page = req.query.page;
+  const page = parseInt(req.query.page) || 1; // Default to 1 if page is not provided
 
   if (!userId) {
     return res.status(400).json({ message: 'User ID is missing or invalid' });
-  }
+  };
 
   try {
-    const result = await getAllClicks(userId, page);
+    const { links, totalItems } = await getAllClicks(userId, page);
+    // const result = await getAllClicks(userId, page);
 
-    return res
-      .status(200)
-      .json({ message: 'Clicks Fetched Successfully', result });
+    // Calculate totalPages
+    const limit = 8;
+    const totalPages = Math.ceil(totalItems / limit);
+    
+    return res.status(200).json({
+      message: 'Clicks Fetched Successfully',
+      result: links,
+      totalPages,
+      currentPage: page,
+      totalItems
+    });
   } catch (error) {
     console.error(error);
 
     if (error.status) {
       return res.status(error.status).json({ message: error.message });
-    }
+    };
 
     return res.status(500).json({ message: 'An error occurred' });
   }
@@ -246,12 +263,28 @@ const clickShortLinkHandler = async (req, res) => {
   // Use useragent library to parse the user agent string
   const agent = useragent.parse(userAgent);
 
-  console.log(agent.family);
-  console.log(agent.device);
-  
-  // Check if device is a string and convert it to lowercase, otherwise fallback to 'Unknown Device'
-  const userDevice = typeof agent.device === 'string' ? agent.device.toLowerCase() : 'Unknown Device';
+  // Check the device type (Android, iOS, Desktop)
+  let userDevice = 'Unknown Device';
 
+
+  // Access the OS family
+  const osFamily = agent.os.family ? agent.os.family.toLowerCase() : null;
+
+  if (osFamily) {
+    if (osFamily.includes('android')) {
+      userDevice = 'android';
+    } else if (osFamily.includes('ios')) {
+      userDevice = 'ios';
+    } else {
+      userDevice = 'desktop'; // Default to desktop if no mobile OS is detected
+    }
+  };
+
+  console.log(agent);
+  console.log(agent.family);
+  console.log('OS Family:', agent.os.family);
+  console.log("device", userDevice);
+  
   if (!shortenUrl || !userDevice || !cleanedIpAddress) {
     return res.status(400).json({
       message: 'Shorten URL, userDevice, and IP address are required',
@@ -260,12 +293,13 @@ const clickShortLinkHandler = async (req, res) => {
 
   try {
     // Add click to the database
-    const result = await addShortLinkClick(shortenUrl, { userDevice, ipAddress: cleanedIpAddress });
+    const originalUrl = await addShortLinkClick(shortenUrl, { userDevice, ipAddress: cleanedIpAddress });
 
-    const redirectLink = `http://localhost:5173/links`
-    // Redirect the user to the original URL
-    // return res.redirect(redirectLink); 
-    res.send({ message: "Clicks Counted" });
+    if (originalUrl === 'EXPIRED') {
+      return res.status(410).json({ message: 'This short URL has expired' });
+    };
+
+    return res.redirect(originalUrl); 
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'An error occurred' });

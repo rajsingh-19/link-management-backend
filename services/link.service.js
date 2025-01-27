@@ -17,7 +17,7 @@ const createLink = async (linkData, userId) => {
     const error = new Error('This User is not associated with any account');
     error.status = 400;
     throw error;
-  }
+  };
 
   // Get the hostname from the environment variable
   const hostname = process.env.HOSTNAME;
@@ -28,7 +28,7 @@ const createLink = async (linkData, userId) => {
     );
     error.status = 500;
     throw error;
-  }
+  };
 
   // Generate a unique code using nanoid
   const { nanoid } = await import('nanoid');
@@ -63,7 +63,7 @@ const deleteLink = async (linkId) => {
     const error = new Error('This Link does not exist');
     error.status = 400;
     throw error;
-  }
+  };
 
   return await LinkModel.findByIdAndDelete(linkId);
 };
@@ -78,7 +78,7 @@ const updateLink = async (linkId, updateData) => {
     const error = new Error('This Link does not exist');
     error.status = 400;
     throw error;
-  }
+  };
 
   const updatedLink = await LinkModel.findByIdAndUpdate(
     linkId,
@@ -97,17 +97,20 @@ const getAllLinks = async (userId, page = 1) => {
     const error = new Error('This User is not associated with any account');
     error.status = 400;
     throw error;
-  }
+  };
 
-  const limit = 10;
+  const limit = 8;
   const skip = (page - 1) * limit;
+
+  // Get total number of links for the user
+  const totalItems = await LinkModel.countDocuments({ userId });
 
   const links = await LinkModel.find({ userId })
     .skip(skip)
     .limit(limit)
     .populate('clicks');
 
-  return links;
+  return { links, totalItems };
 };
 
 // API service to get a link by its ID
@@ -119,7 +122,7 @@ const getLinkById = async (linkId) => {
     const error = new Error('No link found with the provided ID');
     error.status = 404;
     throw error;
-  }
+  };
 
   return link;
 };
@@ -132,9 +135,9 @@ const searchByRemarks = async (userId, remarks, page = 1) => {
     const error = new Error('This User is not associated with any account');
     error.status = 400;
     throw error;
-  }
+  };
 
-  const limit = 10;
+  const limit = 8;
   const skip = (page - 1) * limit;
 
   const links = await LinkModel.find({
@@ -151,9 +154,10 @@ const searchByRemarks = async (userId, remarks, page = 1) => {
 //      api service for geting all clicks on dashboard
 const getAllClicksForDashboard = async (userId) => {
   const isUserExist = await UserModel.findById(userId);
+
   if (!isUserExist) {
     throw new Error('This user is not associated with any account');
-  }
+  };
 
   const links = await LinkModel.find({ userId })
     .sort({ _id: -1 })
@@ -174,17 +178,19 @@ const getAllClicksForDashboard = async (userId) => {
 //    api service for geting all the clicks
 const getAllClicks = async (userId, page = 1) => {
   const isUserExist = await UserModel.findById(userId);
+
     if (!isUserExist) {
       throw new Error('This user is not associated with any account');
-    }
+    };
+
+    const limit = 8;
+    const skip = (page - 1) * limit;  
 
     const links = await LinkModel.find({ userId })
       .sort({ _id: -1 })
       .select('clicks originalUrl shortenUrl');
 
-    const limit = 8;
-    const skip = (page - 1) * limit;
-
+    // Flatten clicks and merge with URL info
     const allClicks = links.reduce((acc, link) => {
     const clicksWithUrls = link.clicks.map((click) => ({
       click,
@@ -195,9 +201,15 @@ const getAllClicks = async (userId, page = 1) => {
     return acc.concat(clicksWithUrls);
   }, []);
 
+  // Total number of clicks
+  const totalItems = allClicks.length;
+
   const paginatedClicks = allClicks.slice(skip, skip + limit);
 
-  return paginatedClicks;
+  return {
+    links: paginatedClicks,
+    totalItems
+  };
 };
 
 
@@ -216,11 +228,18 @@ const addShortLinkClick = async (shortenUrl, clickData) => {
     throw new Error('This link does not exist');
   };
 
+  // Check if the link has an expiry date and if it is expired
+  if (link.linkExpiryDate && new Date(link.linkExpiryDate) < new Date()) {
+    return 'EXPIRED'; // Return 'EXPIRED' if the link has expired
+  };
+  
   const newClick = { userDevice, ipAddress, clickedAt: new Date() };
   link.clicks.push(newClick);
 
   await link.save();
-  return link;
+
+  // Return the original URL
+  return link.originalUrl;
 };
 
 module.exports = {
