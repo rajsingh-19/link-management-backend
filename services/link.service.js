@@ -106,6 +106,7 @@ const getAllLinks = async (userId, page = 1) => {
   const totalItems = await LinkModel.countDocuments({ userId });
 
   const links = await LinkModel.find({ userId })
+    .sort({ _id: -1 })
     .skip(skip)
     .limit(limit)
     .populate('clicks');
@@ -144,6 +145,7 @@ const searchByRemarks = async (userId, remarks, page = 1) => {
     userId,
     remarks: { $regex: remarks, $options: 'i' },
   })
+    .sort({ _id: -1 })
     .skip(skip)
     .limit(limit)
     .populate('clicks');
@@ -204,7 +206,11 @@ const getAllClicks = async (userId, page = 1) => {
   // Total number of clicks
   const totalItems = allClicks.length;
 
-  const paginatedClicks = allClicks.slice(skip, skip + limit);
+  // Reverse the entire `allClicks` array to ensure the most recent clicks are first
+  const reversedAllClicks = allClicks.reverse();
+
+    // Paginate the reversed array
+  const paginatedClicks = reversedAllClicks.slice(skip, skip + limit);
 
   return {
     links: paginatedClicks,

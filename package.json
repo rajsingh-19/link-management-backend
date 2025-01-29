@@ -2,7 +2,7 @@
   "name": "link-management-backend",
   "version": "1.0.0",
   "description": "This is the development repository of link management app.",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
