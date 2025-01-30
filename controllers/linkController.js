@@ -21,11 +21,11 @@ const searchByRemarksHandler = async (req, res) => {
 
   if (!userId) {
     return res.status(400).json({ message: 'User ID is missing or invalid' });
-  }
+  };
 
   if (!remarks) {
     return res.status(400).json({ message: 'Please enter remarks' });
-  }
+  };
 
   try {
     const result = await searchByRemarks(userId, remarks, page);
@@ -51,7 +51,7 @@ const getAllLinksHandler = async (req, res) => {
 
   if (!userId) {
     return res.status(400).json({ message: 'User ID is missing or invalid' });
-  }
+  };
 
   try {
     const { links, totalItems } = await getAllLinks(userId, page);
@@ -72,7 +72,7 @@ const getAllLinksHandler = async (req, res) => {
 
     if (error.status) {
       return res.status(error.status).json({ message: error.message });
-    }
+    };
 
     return res.status(500).json({ message: 'An error occured' });
   }
@@ -265,7 +265,6 @@ const clickShortLinkHandler = async (req, res) => {
 
   // Check the device type (Android, iOS, Desktop)
   let userDevice = 'Unknown Device';
-
 
   // Access the OS family
   const osFamily = agent.os.family ? agent.os.family.toLowerCase() : null;

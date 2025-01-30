@@ -209,7 +209,7 @@ const getAllClicks = async (userId, page = 1) => {
   // Reverse the entire `allClicks` array to ensure the most recent clicks are first
   const reversedAllClicks = allClicks.reverse();
 
-    // Paginate the reversed array
+  // Paginate the reversed array
   const paginatedClicks = reversedAllClicks.slice(skip, skip + limit);
 
   return {
@@ -217,7 +217,6 @@ const getAllClicks = async (userId, page = 1) => {
     totalItems
   };
 };
-
 
 // API service to add a click to a link
 const addShortLinkClick = async (shortenUrl, clickData) => {
