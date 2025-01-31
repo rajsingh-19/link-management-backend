@@ -266,22 +266,46 @@ const clickShortLinkHandler = async (req, res) => {
   // Check the device type (Android, iOS, Desktop)
   let userDevice = 'Unknown Device';
 
+  let deviceType = req.device.type;
+
+  console.log('deviceType', deviceType);
+
   // Access the OS family
   const osFamily = agent.os.family ? agent.os.family.toLowerCase() : null;
 
   console.log(agent.os);
 
+  // if (osFamily) {
+  //   if (osFamily === "android") {
+  //     userDevice = 'android';
+  //   } else if (osFamily === "ios") {
+  //     userDevice = 'ios';
+  //   } else if (osFamily === "mac os x") {
+  //     userDevice = 'tablet';
+  //   } else {
+  //     userDevice = 'desktop';
+  //   }
+  // };
+
   if (osFamily) {
-    if (osFamily === "android") {
-      userDevice = 'android';
-    } else if (osFamily === "ios") {
+    if (osFamily === 'android') {
+      if (deviceType === 'tablet') {
+        userDevice = 'android tablet';
+      } else {
+        userDevice = 'android mobile';
+      }
+    } else if (osFamily === 'ios') {
       userDevice = 'ios';
-    } else if (osFamily === "mac os x") {
-      userDevice = 'tablet';
+    } else if (osFamily === 'mac os x') {
+      if (deviceType === 'tablet') {
+        userDevice = 'mac os x tablet';
+      } else {
+        userDevice = 'mac os x desktop';
+      }
     } else {
-      userDevice = 'desktop';
+      userDevice = 'Windows';
     }
-  };
+  }
 
   console.log('OS Family:', agent.os.family);
   console.log("device", userDevice);
