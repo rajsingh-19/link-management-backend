@@ -270,21 +270,19 @@ const clickShortLinkHandler = async (req, res) => {
   const osFamily = agent.os.family ? agent.os.family.toLowerCase() : null;
 
   console.log(agent.os);
-  
+
   if (osFamily) {
-    if (osFamily.includes('android')) {
+    if (osFamily === "Android") {
       userDevice = 'android';
-    } else if (osFamily.includes('ios')) {
+    } else if (osFamily === "iOS") {
       userDevice = 'ios';
-    } else if (osFamily.includes('Mac OS X')) {
+    } else if (osFamily === "Mac OS X") {
       userDevice = 'tablet';
     } else {
       userDevice = 'desktop'; // Default to desktop if no mobile OS is detected
     }
   };
 
-  console.log(agent);
-  console.log(agent.family);
   console.log('OS Family:', agent.os.family);
   console.log("device", userDevice);
   
