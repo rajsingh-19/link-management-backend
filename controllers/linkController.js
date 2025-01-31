@@ -272,14 +272,14 @@ const clickShortLinkHandler = async (req, res) => {
   console.log(agent.os);
 
   if (osFamily) {
-    if (osFamily === "Android") {
+    if (osFamily === "android") {
       userDevice = 'android';
-    } else if (osFamily === "iOS") {
+    } else if (osFamily === "ios") {
       userDevice = 'ios';
-    } else if (osFamily === "Mac OS X") {
+    } else if (osFamily === "mac os x") {
       userDevice = 'tablet';
     } else {
-      userDevice = 'desktop'; // Default to desktop if no mobile OS is detected
+      userDevice = 'desktop';
     }
   };
 
