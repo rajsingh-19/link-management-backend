@@ -202,39 +202,15 @@ const getAllClicks = async (userId, page = 1) => {
   
     return acc.concat(clicksWithUrls);
   }, []);
-
-  // console.log(allClicks);
-  // // Total number of clicks
-  // const totalItems = allClicks.length;
-
-  // // Reverse the entire `allClicks` array to ensure the most recent clicks are first
-  // const reversedAllClicks = allClicks.reverse();
-
-  // console.log(reversedAllClicks);
-
-  // const allClicks = links.reduce((acc, link) => {
-  //   const clicksWithUrls = link.clicks.map((click) => ({
-  //     ...click, // Assuming click object contains clickedAt property
-  //     originalUrl: link.originalUrl,
-  //     shortenUrl: link.shortenUrl,
-  //   }));
-  
-  //   return acc.concat(clicksWithUrls);
-  // }, []);
-  
-  console.log("all clicks", allClicks);
   
   // Total number of clicks
   const totalItems = allClicks.length;
   
   // Sort allClicks array based on clickedAt date in descending order
   const sortedAllClicks = allClicks.sort((a, b) => new Date(b.click.clickedAt) - new Date(a.click.clickedAt));
-  
-  console.log("sorted all clicks", sortedAllClicks);
-  
+
   // Paginate the reversed array
   const paginatedClicks = sortedAllClicks.slice(skip, skip + limit);
-  console.log("paginated clicks", paginatedClicks);
 
   return {
     links: paginatedClicks,
@@ -251,7 +227,6 @@ const addShortLinkClick = async (shortenUrl, clickData) => {
   const hostname = process.env.HOSTNAME;
   const filterUrl = `${hostname}/${shortenUrl}`
 
-  console.log(filterUrl);
   const link = await LinkModel.findOne({ shortenUrl: filterUrl });
   if (!link) {
     throw new Error('This link does not exist');

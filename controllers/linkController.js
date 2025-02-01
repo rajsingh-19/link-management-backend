@@ -38,7 +38,7 @@ const searchByRemarksHandler = async (req, res) => {
 
     if (error.status) {
       return res.status(error.status).json({ message: error.message });
-    }
+    };
 
     return res.status(500).json({ message: 'An error occured' });
   }
@@ -268,24 +268,8 @@ const clickShortLinkHandler = async (req, res) => {
 
   let deviceType = req.device.type;
 
-  console.log('deviceType', deviceType);
-
   // Access the OS family
   const osFamily = agent.os.family ? agent.os.family.toLowerCase() : null;
-
-  console.log(agent.os);
-
-  // if (osFamily) {
-  //   if (osFamily === "android") {
-  //     userDevice = 'android';
-  //   } else if (osFamily === "ios") {
-  //     userDevice = 'ios';
-  //   } else if (osFamily === "mac os x") {
-  //     userDevice = 'tablet';
-  //   } else {
-  //     userDevice = 'desktop';
-  //   }
-  // };
 
   if (osFamily) {
     if (osFamily === 'android') {
@@ -307,9 +291,6 @@ const clickShortLinkHandler = async (req, res) => {
     }
   }
 
-  console.log('OS Family:', agent.os.family);
-  console.log("device", userDevice);
-  
   if (!shortenUrl || !userDevice || !cleanedIpAddress) {
     return res.status(400).json({
       message: 'Shorten URL, userDevice, and IP address are required',
