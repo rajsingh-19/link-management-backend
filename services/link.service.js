@@ -193,24 +193,45 @@ const getAllClicks = async (userId, page = 1) => {
       .select('clicks originalUrl shortenUrl');
 
     // Flatten clicks and merge with URL info
-    const allClicks = links.reduce((acc, link) => {
+  //   const allClicks = links.reduce((acc, link) => {
+  //   const clicksWithUrls = link.clicks.map((click) => ({
+  //     click,
+  //     originalUrl: link.originalUrl,
+  //     shortenUrl: link.shortenUrl,
+  //   }));
+  
+  //   return acc.concat(clicksWithUrls);
+  // }, []);
+
+  // console.log(allClicks);
+  // // Total number of clicks
+  // const totalItems = allClicks.length;
+
+  // // Reverse the entire `allClicks` array to ensure the most recent clicks are first
+  // const reversedAllClicks = allClicks.reverse();
+
+  // console.log(reversedAllClicks);
+
+  const allClicks = links.reduce((acc, link) => {
     const clicksWithUrls = link.clicks.map((click) => ({
-      click,
+      ...click, // Assuming click object contains clickedAt property
       originalUrl: link.originalUrl,
       shortenUrl: link.shortenUrl,
     }));
   
     return acc.concat(clicksWithUrls);
   }, []);
-
+  
   console.log(allClicks);
+  
   // Total number of clicks
   const totalItems = allClicks.length;
-
-  // Reverse the entire `allClicks` array to ensure the most recent clicks are first
-  const reversedAllClicks = allClicks.reverse();
-
-  console.log(reversedAllClicks);
+  
+  // Sort allClicks array based on clickedAt date in descending order
+  const sortedAllClicks = allClicks.sort((a, b) => new Date(b.click.clickedAt) - new Date(a.click.clickedAt));
+  
+  console.log(sortedAllClicks);
+  
 
   // Paginate the reversed array
   const paginatedClicks = reversedAllClicks.slice(skip, skip + limit);
