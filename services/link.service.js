@@ -234,7 +234,7 @@ const getAllClicks = async (userId, page = 1) => {
   
 
   // Paginate the reversed array
-  const paginatedClicks = reversedAllClicks.slice(skip, skip + limit);
+  const paginatedClicks = sortedAllClicks.slice(skip, skip + limit);
   console.log(paginatedClicks);
 
   return {
