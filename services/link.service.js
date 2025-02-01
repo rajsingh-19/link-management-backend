@@ -220,7 +220,6 @@ const getAllClicks = async (userId, page = 1) => {
 
 // API service to add a click to a link
 const addShortLinkClick = async (shortenUrl, clickData) => {
-  console.log(shortenUrl);
   const { userDevice, ipAddress } = clickData;
 
   // Get the hostname from the environment variable
