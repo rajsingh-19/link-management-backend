@@ -228,13 +228,12 @@ const getAllClicks = async (userId, page = 1) => {
   const totalItems = allClicks.length;
   
   // Sort allClicks array based on clickedAt date in descending order
-  const sortedAllClicks = allClicks.sort((a, b) => new Date(b.click.clickedAt) - new Date(a.click.clickedAt));
+  // const sortedAllClicks = allClicks.sort((a, b) => new Date(b.click.clickedAt) - new Date(a.click.clickedAt));
   
-  console.log(sortedAllClicks);
+  // console.log(sortedAllClicks);
   
-
   // Paginate the reversed array
-  const paginatedClicks = sortedAllClicks.slice(skip, skip + limit);
+  const paginatedClicks = allClicks.slice(skip, skip + limit);
   console.log(paginatedClicks);
 
   return {
