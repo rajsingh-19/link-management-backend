@@ -203,14 +203,18 @@ const getAllClicks = async (userId, page = 1) => {
     return acc.concat(clicksWithUrls);
   }, []);
 
+  console.log(allClicks);
   // Total number of clicks
   const totalItems = allClicks.length;
 
   // Reverse the entire `allClicks` array to ensure the most recent clicks are first
   const reversedAllClicks = allClicks.reverse();
 
+  console.log(reversedAllClicks);
+
   // Paginate the reversed array
   const paginatedClicks = reversedAllClicks.slice(skip, skip + limit);
+  console.log(paginatedClicks);
 
   return {
     links: paginatedClicks,
