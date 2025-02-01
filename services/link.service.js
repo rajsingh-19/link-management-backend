@@ -193,15 +193,15 @@ const getAllClicks = async (userId, page = 1) => {
       .select('clicks originalUrl shortenUrl');
 
     // Flatten clicks and merge with URL info
-  //   const allClicks = links.reduce((acc, link) => {
-  //   const clicksWithUrls = link.clicks.map((click) => ({
-  //     click,
-  //     originalUrl: link.originalUrl,
-  //     shortenUrl: link.shortenUrl,
-  //   }));
+    const allClicks = links.reduce((acc, link) => {
+    const clicksWithUrls = link.clicks.map((click) => ({
+      click,
+      originalUrl: link.originalUrl,
+      shortenUrl: link.shortenUrl,
+    }));
   
-  //   return acc.concat(clicksWithUrls);
-  // }, []);
+    return acc.concat(clicksWithUrls);
+  }, []);
 
   // console.log(allClicks);
   // // Total number of clicks
@@ -212,29 +212,29 @@ const getAllClicks = async (userId, page = 1) => {
 
   // console.log(reversedAllClicks);
 
-  const allClicks = links.reduce((acc, link) => {
-    const clicksWithUrls = link.clicks.map((click) => ({
-      ...click, // Assuming click object contains clickedAt property
-      originalUrl: link.originalUrl,
-      shortenUrl: link.shortenUrl,
-    }));
+  // const allClicks = links.reduce((acc, link) => {
+  //   const clicksWithUrls = link.clicks.map((click) => ({
+  //     ...click, // Assuming click object contains clickedAt property
+  //     originalUrl: link.originalUrl,
+  //     shortenUrl: link.shortenUrl,
+  //   }));
   
-    return acc.concat(clicksWithUrls);
-  }, []);
+  //   return acc.concat(clicksWithUrls);
+  // }, []);
   
-  console.log(allClicks);
+  console.log("all clicks", allClicks);
   
   // Total number of clicks
   const totalItems = allClicks.length;
   
   // Sort allClicks array based on clickedAt date in descending order
-  // const sortedAllClicks = allClicks.sort((a, b) => new Date(b.click.clickedAt) - new Date(a.click.clickedAt));
+  const sortedAllClicks = allClicks.sort((a, b) => new Date(b.click.clickedAt) - new Date(a.click.clickedAt));
   
-  // console.log(sortedAllClicks);
+  console.log("sorted all clicks", sortedAllClicks);
   
   // Paginate the reversed array
-  const paginatedClicks = allClicks.slice(skip, skip + limit);
-  console.log(paginatedClicks);
+  const paginatedClicks = sortedAllClicks.slice(skip, skip + limit);
+  console.log("paginated clicks", paginatedClicks);
 
   return {
     links: paginatedClicks,
